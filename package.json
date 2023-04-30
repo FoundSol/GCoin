@@ -13,8 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@chainlink/contracts": "^0.6.1",
-    "@openzeppelin/contracts": "^4.8.3",
     "truffle": "^5.8.3"
+  },
+  "devDependencies": {
+    "@chainlink/contracts": "^0.6.1",
+    "@openzeppelin/contracts": "^4.8.3"
   }
 }

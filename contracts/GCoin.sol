@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract GCoin is ERC20, Ownable {
+
     using SafeMath for uint256;
 
     AggregatorV3Interface internal stableCoinPriceFeed;
@@ -50,6 +51,15 @@ contract GCoin is ERC20, Ownable {
         );
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return uint256(price);
+    }
+
+    function getGCoinOutputFromStable(uint256 usdcAmount) public view returns (uint256) {
+        uint256 gcoinAmount = usdcAmount
+            .mul(stableCoinDecimals)
+            .div(gcoinValue)
+            .mul(100)
+            .div(100 + mintingFee);
+        return gcoinAmount;
     }
 
     function stableCoinToGCoin(uint256 amount) public {
