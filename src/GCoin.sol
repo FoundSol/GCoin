@@ -47,36 +47,28 @@ contract GCoin is ERC20, Ownable, Pausable {
     }
 
     function getGCoinOutputFromStable(address token, uint256 amount) public view returns (uint256) {
-        uint256 stableCoinDecimals = 10**uint256(stableCoins[token].decimals());
         uint256 gcoinAmount = amount
-            .mul(stableCoinDecimals)
+            .mul(10**uint256(decimals()))
+            .div(10**uint256(stableCoins[token].decimals()))
+            .mul(10**uint256(decimals()))
             .div(gcoinValue)
-            .mul(100)
-            .div(100 + mintingFee);
+            .mul(100 - mintingFee)
+            .div(100);
         return gcoinAmount;
     }
 
     function stableCoinToGCoin(address token, uint256 amount) public whenNotPaused {
-        ERC20 stableCoin = stableCoins[token];
-        require(address(stableCoin) != address(0), "Stable coin not found");
         require(treasury != address(0), "Treasury address not set");
+        require(address(stableCoins[token]) != address(0), "Stable coin not found");
+        require(stableCoins[token].allowance(msg.sender, address(this)) >= amount, "Amount not allowed");
 
-        uint256 allowance = stableCoin.allowance(msg.sender, address(this));
-        require(allowance >= amount, "Amount not allowed");
+        uint256 gcoinAmount = getGCoinOutputFromStable(token, amount);
 
-        uint256 stableCoinDecimals = 10**uint256(stableCoin.decimals());
-        uint256 gcoinAmount = amount
-            .mul(stableCoinDecimals)
-            .div(gcoinValue)
-            .mul(100)
-            .div(100 + mintingFee);
-
-        uint256 initialTreasuryBalance = stableCoin.balanceOf(treasury);
-        stableCoin.safeTransferFrom(msg.sender, treasury, amount);
-        uint256 finalTreasuryBalance = stableCoin.balanceOf(treasury);
+        uint256 initialTreasuryBalance = stableCoins[token].balanceOf(treasury);
+        stableCoins[token].safeTransferFrom(msg.sender, treasury, amount);
 
         require(
-            finalTreasuryBalance == initialTreasuryBalance.add(amount),
+            stableCoins[token].balanceOf(treasury) == initialTreasuryBalance.add(amount),
             "Treasury balance did not increase correctly"
         );
 
