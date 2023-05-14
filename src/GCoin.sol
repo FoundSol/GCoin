@@ -83,6 +83,14 @@ contract GCoin is ERC20, Ownable, Pausable {
         gcoinValue = chainlinkValue;
     }
 
+    function updateGCoinValueManual(uint256 manualValue) external onlyOwner {
+        gcoinValue = manualValue;
+    }
+
+    function updateMintingFee(uint256 mintingFeeNew) external onlyOwner {
+        mintingFee = mintingFeeNew;
+    }
+
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }

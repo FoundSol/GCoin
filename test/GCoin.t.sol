@@ -77,6 +77,37 @@ contract GCoinTest is Test {
 
         uint256 gcoinBalance = gcoin.balanceOf(address(this));
         assert(gcoinBalance == 990000000000000000);
-        emit log_int(int256(gcoinBalance));
+    }
+
+    // Test that minting succeeds with a different gCoin value
+    function test_Mint_gValue() public {
+        gcoin.updateGCoinValueManual(2e18);
+        gcoin.addStableCoin(address(stablecoin6digit));
+        stablecoin6digit.approve(address(gcoin), 1000000);
+        gcoin.stableCoinToGCoin(address(stablecoin6digit), 1000000);
+
+        uint256 gcoinBalance = gcoin.balanceOf(address(this));
+        assert(gcoinBalance == 495000000000000000);
+    }
+
+    // Test that minting with treasury increase
+    function test_Mint_treasury() public {
+        gcoin.updateGCoinValueManual(2e18);
+        gcoin.addStableCoin(address(stablecoin6digit));
+        stablecoin6digit.approve(address(gcoin), 1000000);
+        gcoin.stableCoinToGCoin(address(stablecoin6digit), 1000000);
+
+        uint256 stableBalanceGcoin = stablecoin6digit.balanceOf(address(this));
+        uint256 stableBalanceTreasury = stablecoin6digit.balanceOf(gcoin.treasury());
+        assert(stableBalanceGcoin == 0);
+        assert(stableBalanceTreasury == 1000000);
+        // console2.log(stableBalanceGcoin, stableBalanceTreasury);
+    }
+
+    function test_RevertWhen_CallerIsNotOwner() public {
+        vm.expectRevert();
+        vm.startPrank(address(111));
+        gcoin.mint(address(33), 100);
+        vm.stopPrank();
     }
 }
