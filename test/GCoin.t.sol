@@ -51,6 +51,12 @@ contract GCoinTest is Test {
         gcoin.setTreasury(address(treasury));
     }
 
+    // Test that expected output fails with an invalid stablecoin
+    function test_OutputWithInvalid() public {
+        vm.expectRevert();
+        gcoin.getGCoinOutputFromStable(address(stablecoin0), 10);
+    }
+
     // Test that minting fails with an invalid stablecoin
     function test_MintWithInvalid() public {
         vm.expectRevert();
